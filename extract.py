@@ -2,8 +2,14 @@ import argparse
 import requests
 from bs4 import BeautifulSoup
 
-def extract(imageFlag, videoFlag, parsedHTML, webpageURL):
-    result = "PATH " + webpageURL + "\n"
+def createFolder(folderName, folderPath):
+    print("hello")
+
+def saveFiles():
+    print("hi")
+
+def extract(imageFlag, videoFlag, path, parsedHTML, webpageURL):
+    result = ""
 
     if(imageFlag & videoFlag):
         result+=""
@@ -26,7 +32,17 @@ def extract(imageFlag, videoFlag, parsedHTML, webpageURL):
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
             result+=elementName + src + " " + alt  +"\n"
 
-    print(result)
+    if(path):
+        pathString= "PATH " + path + "\n"
+        createFolder("Saved Resources", path)
+        saveFiles()
+        result = pathString + result
+        print(result)
+    else: 
+        pathString= "PATH " + webpageURL + "\n"
+        result = pathString + result
+        print (result)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Webscraping script used to display/save images and videos from a webpage url provided")
@@ -34,6 +50,7 @@ def main():
     # Adding the optional arguments of the command
     parser.add_argument("-i", "--image", action="store_true", help="Exclude images from results")
     parser.add_argument("-v", "--video", action="store_true", help="Exclude videos from results")
+    parser.add_argument("-p", "--path", help="Save a copy of the resources locally")
 
     # Adding required argument : URL
     parser.add_argument("url", help="URL of the webpage")
@@ -50,7 +67,7 @@ def main():
     # Parsing html
     soup = BeautifulSoup(response.text, "html.parser")
 
-    extract(args.image, args.video, soup, url)
+    extract(args.image, args.video, args.path, soup, url)
 
 if __name__=="__main__":
     main()
