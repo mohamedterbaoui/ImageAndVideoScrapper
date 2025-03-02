@@ -2,18 +2,29 @@ import argparse
 import requests
 from bs4 import BeautifulSoup
 
-def extract(imageFlag, videoFlag, parsedHTML):
-    result = ""
+def extract(imageFlag, videoFlag, parsedHTML, webpageURL):
+    result = "PATH " + webpageURL + "\n"
 
-    if(imageFlag):
+    if(imageFlag & videoFlag):
+        result+=""
+    elif(imageFlag & (not videoFlag)):
         noImagesFilter = parsedHTML.find_all(lambda tag: tag.name not in ["img"])
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
-            result+=str(tag)
-    
+            result+="VIDEO: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
+    elif((not imageFlag) & videoFlag):
+        noVideosFilter = parsedHTML.find_all(lambda tag: tag.name not in ["video"])
+        noVideosFilter = parsedHTML.find_all("img")
+        for tag in noVideosFilter:
+            result+="IMAGE: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
     else:
         for tag in parsedHTML.find_all(["img", "video"]):
-            result+=str(tag)+"\n"
+            elementName = ""
+            if(tag.name =="img"):
+                elementName = "IMAGE "
+            elif(tag.name == "video"):
+                elementName = "VIDEO "
+            result+=elementName + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
 
     print(result)
 
@@ -39,4 +50,4 @@ response = requests.get(url)
 # Parsing html
 soup = BeautifulSoup(response.text, "html.parser")
 
-extract(args.image, args.video, soup)
+extract(args.image, args.video, soup, url)
