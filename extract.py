@@ -8,12 +8,10 @@ def extract(imageFlag, videoFlag, parsedHTML, webpageURL):
     if(imageFlag & videoFlag):
         result+=""
     elif(imageFlag & (not videoFlag)):
-        noImagesFilter = parsedHTML.find_all(lambda tag: tag.name not in ["img"])
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
             result+="VIDEO: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
     elif((not imageFlag) & videoFlag):
-        noVideosFilter = parsedHTML.find_all(lambda tag: tag.name not in ["video"])
         noVideosFilter = parsedHTML.find_all("img")
         for tag in noVideosFilter:
             result+="IMAGE: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
@@ -24,30 +22,36 @@ def extract(imageFlag, videoFlag, parsedHTML, webpageURL):
                 elementName = "IMAGE "
             elif(tag.name == "video"):
                 elementName = "VIDEO "
-            result+=elementName + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
+            src = str(tag.get("src")) if tag.get("src") else ""
+            alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
+            result+=elementName + src + " " + alt  +"\n"
 
     print(result)
 
+def main():
+    parser = argparse.ArgumentParser(description="Webscraping script used to display/save images and videos from a webpage url provided")
 
-parser = argparse.ArgumentParser(description="Script pour lire les arguments")
+    # Adding the optional arguments of the command
+    parser.add_argument("-i", "--image", action="store_true", help="Exclude images from results")
+    parser.add_argument("-v", "--video", action="store_true", help="Exclude videos from results")
 
-# Adding the optional arguments of the command
-parser.add_argument("-i", "--image", action="store_true", help="Exclude images")
-parser.add_argument("-v", "--video", action="store_true", help="Exclude videos")
+    # Adding required argument : URL
+    parser.add_argument("url", help="URL of the webpage")
 
-# Adding required argument : URL
-parser.add_argument("url", help="URL of the webpage")
+    # Parsing the arguments
+    args = parser.parse_args()
 
-# Parsing the arguments
-args = parser.parse_args()
+    # defining the url of the webpage
+    url = args.url
 
-# defining the url of the webpage
-url = args.url
+    # fetching the webpage
+    response = requests.get(url)
 
-# fetching the webpage
-response = requests.get(url)
+    # Parsing html
+    soup = BeautifulSoup(response.text, "html.parser")
 
-# Parsing html
-soup = BeautifulSoup(response.text, "html.parser")
+    extract(args.image, args.video, soup, url)
 
-extract(args.image, args.video, soup, url)
+if __name__=="__main__":
+    main()
+
