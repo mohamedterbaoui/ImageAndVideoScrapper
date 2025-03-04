@@ -64,9 +64,10 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
         for file in savedFiles:
             print(file['type'] + ": " + file['path'] + " " + file['alt'])
     else: 
-        pathString= "PATH " + webpageURL + "\n"
-        result = pathString + result
-        print (result)
+        pathString= "PATH " + webpageURL
+        print(pathString)
+        for res in resources:
+            print(res['type'] + ": " + res['url'] + " " + res['alt'])
 
 
 def main():
