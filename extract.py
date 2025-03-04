@@ -31,22 +31,35 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
     if(imageFlag and (not videoFlag)):
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
-            alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            resources.append({"type": "VIDEO", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
+            sourceTag = tag.find("source")
+            src = sourceTag["src"] if sourceTag and sourceTag.get("src") else ""
+            resources.append({"type": "VIDEO", "url": urljoin(webpageURL, src), "alt":""})
+
     elif((not imageFlag) and videoFlag):
         noVideosFilter = parsedHTML.find_all("img")
         for tag in noVideosFilter:
+            src = tag.get("src", "")
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            resources.append({"type": "IMAGE", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
+            resources.append({"type": "IMAGE", "url": urljoin(webpageURL, src), "alt":alt})
+
     else:
         for tag in parsedHTML.find_all(["img", "video"]):
             resourceType = ""
             if(tag.name =="img"):
                 resourceType = "IMAGE"
+                src = tag.get("src") if tag.get("src") else ""
+                alt = tag.get("alt", "")
+
             elif(tag.name == "video"):
                 resourceType = "VIDEO"
+                # Sometimes video elements don't have a src attribute but other elements inside <source>
+                sourceTag = tag.find("source")
+                src = sourceTag["src"] if sourceTag and sourceTag.get("src") else ""
+                alt = ""
+
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
+            
+            resources.append({"type": resourceType, "url": urljoin(webpageURL, src), "alt": alt})
 
     if (regex):
         resources = [res for res in resources if regex in res['url']]
