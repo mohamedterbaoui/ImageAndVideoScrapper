@@ -4,7 +4,7 @@ import os
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
-def createFolder(folderName, folderPath):
+def createFolder(folderPath):
     if not os.path.exists(folderPath):
         os.makedirs(folderPath)
     else:
@@ -55,7 +55,7 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
 
     if(path):
         pathString= "PATH " + path
-        createFolder("Saved Resources", path)
+        createFolder(path)
         savedFiles = saveFiles(resources, path)
         print(pathString)
         for file in savedFiles:
