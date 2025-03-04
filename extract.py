@@ -24,7 +24,6 @@ def saveFiles(resources, folderPath):
     return savedFiles
 
 def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
-    result = ""
     resources = []
 
     if(imageFlag and videoFlag):
@@ -32,7 +31,6 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
     elif(imageFlag and (not videoFlag)):
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
-            result+="VIDEO: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
             resources.append({"type": "VIDEO", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
     elif((not imageFlag) and videoFlag):
@@ -50,7 +48,6 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
                 resourceType = "VIDEO "
             src = str(tag.get("src")) if tag.get("src") else ""
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            result+=resourceType + src + " " + alt  +"\n"
             resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
 
     if (regex):
