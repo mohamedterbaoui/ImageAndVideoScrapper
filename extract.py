@@ -11,22 +11,21 @@ def createFolder(folderName, folderPath):
         print("Directory Already exists")
 
 def saveFiles(resources, folderPath):
-    filesPaths = []
+    savedFiles = []
     for res in resources:
         img_data = requests.get(res["url"]).content
         fileName = res["url"].split('/')[-1]
         filePath = os.path.join(folderPath, fileName)
-        filesPaths.append({"type": res["type"], "path":filePath})
+        savedFiles.append({"type": res["type"], "path":filePath, "alt":res["alt"]})
 
         with open(filePath, 'wb') as handler:
             handler.write(img_data)
     
-    return filesPaths
+    return savedFiles
 
-def extract(imageFlag, videoFlag, path, parsedHTML, webpageURL):
+def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
     result = ""
     resources = []
-
 
     if(imageFlag and videoFlag):
         result+=""
@@ -34,12 +33,14 @@ def extract(imageFlag, videoFlag, path, parsedHTML, webpageURL):
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
             result+="VIDEO: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
-            resources.append({"type": "VIDEO", "url": urljoin(webpageURL, tag.get("src"))})
+            alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
+            resources.append({"type": "VIDEO", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
     elif((not imageFlag) and videoFlag):
         noVideosFilter = parsedHTML.find_all("img")
         for tag in noVideosFilter:
             result+="IMAGE: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
-            resources.append({"type": "IMAGE", "url": urljoin(webpageURL, tag.get("src"))})
+            alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
+            resources.append({"type": "IMAGE", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
     else:
         for tag in parsedHTML.find_all(["img", "video"]):
             resourceType = ""
@@ -50,15 +51,18 @@ def extract(imageFlag, videoFlag, path, parsedHTML, webpageURL):
             src = str(tag.get("src")) if tag.get("src") else ""
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
             result+=resourceType + src + " " + alt  +"\n"
-            resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src"))})
+            resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
+
+    if (regex):
+        resources = [res for res in resources if regex in res['url']]
 
     if(path):
-        pathString= "PATH " + path + "\n"
+        pathString= "PATH " + path
         createFolder("Saved Resources", path)
-        localPaths = saveFiles(resources, path)
-        result = pathString + result
-        print(result)
-        print(localPaths)
+        savedFiles = saveFiles(resources, path)
+        print(pathString)
+        for file in savedFiles:
+            print(file['type'] + ": " + file['path'] + " " + file['alt'])
     else: 
         pathString= "PATH " + webpageURL + "\n"
         result = pathString + result
@@ -72,6 +76,8 @@ def main():
     parser.add_argument("-i", "--image", action="store_true", help="Exclude images from results")
     parser.add_argument("-v", "--video", action="store_true", help="Exclude videos from results")
     parser.add_argument("-p", "--path", help="Save a copy of the resources locally")
+    parser.add_argument("-r", "--regex", help="Filter the resources that contain the sequence of characters provided")
+
 
     # Adding required argument : URL
     parser.add_argument("url", help="URL of the webpage")
@@ -88,8 +94,7 @@ def main():
     # Parsing html
     soup = BeautifulSoup(response.text, "html.parser")
 
-    extract(args.image, args.video, args.path, soup, url)
+    extract(args.image, args.video, args.path, args.regex, soup, url)
 
 if __name__=="__main__":
     main()
-
