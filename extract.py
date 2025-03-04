@@ -3,6 +3,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 def createFolder(folderPath):
     if not os.path.exists(folderPath):
@@ -14,7 +15,8 @@ def saveFiles(resources, folderPath):
     savedFiles = []
     for res in resources:
         img_data = requests.get(res["url"]).content
-        fileName = res["url"].split('/')[-1]
+        parsedURL = urlparse(res["url"])
+        fileName = os.path.basename(parsedURL.path)
         filePath = os.path.join(folderPath, fileName)
         savedFiles.append({"type": res["type"], "path":filePath, "alt":res["alt"]})
 
@@ -26,9 +28,7 @@ def saveFiles(resources, folderPath):
 def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
     resources = []
 
-    if(imageFlag and videoFlag):
-        result+=""
-    elif(imageFlag and (not videoFlag)):
+    if(imageFlag and (not videoFlag)):
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
@@ -36,17 +36,15 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
     elif((not imageFlag) and videoFlag):
         noVideosFilter = parsedHTML.find_all("img")
         for tag in noVideosFilter:
-            result+="IMAGE: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
             resources.append({"type": "IMAGE", "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
     else:
         for tag in parsedHTML.find_all(["img", "video"]):
             resourceType = ""
             if(tag.name =="img"):
-                resourceType = "IMAGE "
+                resourceType = "IMAGE"
             elif(tag.name == "video"):
-                resourceType = "VIDEO "
-            src = str(tag.get("src")) if tag.get("src") else ""
+                resourceType = "VIDEO"
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
             resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src")), "alt":alt})
 
