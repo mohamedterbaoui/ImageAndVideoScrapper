@@ -1,43 +1,64 @@
 import argparse
 import requests
+import os
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 def createFolder(folderName, folderPath):
-    print("hello")
+    if not os.path.exists(folderPath):
+        os.makedirs(folderPath)
+    else:
+        print("Directory Already exists")
 
-def saveFiles():
-    print("hi")
+def saveFiles(resources, folderPath):
+    filesPaths = []
+    for res in resources:
+        img_data = requests.get(res["url"]).content
+        fileName = res["url"].split('/')[-1]
+        filePath = os.path.join(folderPath, fileName)
+        filesPaths.append({"type": res["type"], "path":filePath})
+
+        with open(filePath, 'wb') as handler:
+            handler.write(img_data)
+    
+    return filesPaths
 
 def extract(imageFlag, videoFlag, path, parsedHTML, webpageURL):
     result = ""
+    resources = []
 
-    if(imageFlag & videoFlag):
+
+    if(imageFlag and videoFlag):
         result+=""
-    elif(imageFlag & (not videoFlag)):
+    elif(imageFlag and (not videoFlag)):
         noImagesFilter = parsedHTML.find_all("video")
         for tag in noImagesFilter:
             result+="VIDEO: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
-    elif((not imageFlag) & videoFlag):
+            resources.append({"type": "VIDEO", "url": urljoin(webpageURL, tag.get("src"))})
+    elif((not imageFlag) and videoFlag):
         noVideosFilter = parsedHTML.find_all("img")
         for tag in noVideosFilter:
             result+="IMAGE: " + str(tag.get("src"))+ " " + str(tag.get("alt")) +"\n"
+            resources.append({"type": "IMAGE", "url": urljoin(webpageURL, tag.get("src"))})
     else:
         for tag in parsedHTML.find_all(["img", "video"]):
-            elementName = ""
+            resourceType = ""
             if(tag.name =="img"):
-                elementName = "IMAGE "
+                resourceType = "IMAGE "
             elif(tag.name == "video"):
-                elementName = "VIDEO "
+                resourceType = "VIDEO "
             src = str(tag.get("src")) if tag.get("src") else ""
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            result+=elementName + src + " " + alt  +"\n"
+            result+=resourceType + src + " " + alt  +"\n"
+            resources.append({"type": resourceType, "url": urljoin(webpageURL, tag.get("src"))})
 
     if(path):
         pathString= "PATH " + path + "\n"
         createFolder("Saved Resources", path)
-        saveFiles()
+        localPaths = saveFiles(resources, path)
         result = pathString + result
         print(result)
+        print(localPaths)
     else: 
         pathString= "PATH " + webpageURL + "\n"
         result = pathString + result
