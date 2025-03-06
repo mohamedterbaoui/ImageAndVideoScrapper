@@ -58,7 +58,7 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
                 alt = ""
 
             alt = "\"" + str(tag.get("alt")) + "\"" if tag.get("alt") else ""
-            
+
             resources.append({"type": resourceType, "url": urljoin(webpageURL, src), "alt": alt})
 
     if (regex):
