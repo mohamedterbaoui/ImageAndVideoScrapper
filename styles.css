@@ -68,8 +68,11 @@
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
-.popup-resource img {
+.popup-resource img,
+.popup-resource video {
   width: 100%;
+  min-width: 300px;
+  max-width: 800px;
 }
 
 .nav-btns {
@@ -146,8 +149,10 @@
   width: fit-content;
 }
 
-.carousel-slide img {
+.carousel-slide img,
+.carousel-slide video {
   width: 100%;
+  min-width: 300px;
   border-radius: 8px;
 }
 
@@ -219,7 +224,8 @@
   background-color: rgba(0, 0, 0, 0.7);
 }
 
-.gallery-display img {
+.gallery-display img,
+.gallery-display video {
   max-width: 300px;
   max-height: 300px;
   min-width: 200px;

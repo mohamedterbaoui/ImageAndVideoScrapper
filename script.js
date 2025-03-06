@@ -41,12 +41,23 @@ function popup() {
       console.log("mousedown");
       let resContainer = document.createElement("div");
       resContainer.classList.add("popup-resource");
-      let res = document.createElement("img");
-      res.setAttribute("src", cells[0].textContent.trim());
-      res.setAttribute("alt", cells[1].textContent.trim());
 
-      resContainer.appendChild(res);
-      tableSection.appendChild(resContainer);
+      let resType = cells[0].getAttribute("data-type");
+
+      if (resType === "image") {
+        let res = document.createElement("img");
+        res.setAttribute("src", cells[0].textContent.trim());
+        res.setAttribute("alt", cells[1].textContent.trim());
+        resContainer.appendChild(res);
+        tableSection.appendChild(resContainer);
+      } else if (resType === "video") {
+        let res = document.createElement("video");
+        res.setAttribute("src", cells[0].textContent.trim());
+        res.setAttribute("alt", cells[1].textContent.trim());
+        res.controls = true;
+        resContainer.appendChild(res);
+        tableSection.appendChild(resContainer);
+      }
     });
 
     document.addEventListener("mouseup", () => {
@@ -97,9 +108,10 @@ function getTableData() {
   rows.forEach((row) => {
     let cells = row.querySelectorAll("td");
     if (cells.length >= 2) {
+      let resType = cells[0].getAttribute("data-type");
       let src = cells[0].textContent.trim();
       let alt = cells[1].textContent.trim();
-      data.push({ src, alt });
+      data.push({ resType, src, alt });
     }
   });
 
@@ -108,10 +120,18 @@ function getTableData() {
 
 function createGallery(data) {
   data.forEach((d) => {
-    let image = document.createElement("img");
-    image.setAttribute("src", d.src);
-    image.setAttribute("alt", d.alt);
-    galleryContainer.appendChild(image);
+    if (d.resType === "image") {
+      let image = document.createElement("img");
+      image.setAttribute("src", d.src);
+      image.setAttribute("alt", d.alt);
+      galleryContainer.appendChild(image);
+    } else if (d.resType === "video") {
+      let video = document.createElement("video");
+      video.setAttribute("src", d.src);
+      video.setAttribute("alt", d.alt);
+      video.controls = true;
+      galleryContainer.appendChild(video);
+    }
   });
 }
 
@@ -122,9 +142,14 @@ function createCarousel(data) {
     let carouselSlide = document.createElement("div");
     carouselSlide.classList.add("carousel-slide");
 
-    let image = document.createElement("img");
-    image.setAttribute("src", d.src);
-    image.setAttribute("alt", d.alt);
+    const type = d.resType === "video" ? "video" : "img";
+
+    let res = document.createElement(type);
+    res.setAttribute("src", d.src);
+    res.setAttribute("alt", d.alt);
+    if (type === "video") {
+      res.controls = true;
+    }
 
     let resourceText = document.createElement("div");
     resourceText.classList.add("resource-overlay");
@@ -139,7 +164,7 @@ function createCarousel(data) {
 
     dotsContainer.appendChild(dot);
 
-    carouselSlide.appendChild(image);
+    carouselSlide.appendChild(res);
     carouselSlide.appendChild(resourceText);
     carouselSlide.appendChild(textOverlay);
 

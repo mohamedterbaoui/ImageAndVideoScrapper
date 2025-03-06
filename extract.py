@@ -79,7 +79,9 @@ def extract(imageFlag, videoFlag, path, regex, parsedHTML, webpageURL):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Webscraping script used to display/save images and videos from a webpage url provided")
+    parser = argparse.ArgumentParser(prog="Image and video webpage scrapper", 
+                                     description="Webscraping script used to display/save images and videos from a webpage url provided",
+                                     epilog="Authors : Mohamed Terbaoui 20234792 | Mehdi")
 
     # Adding the optional arguments of the command
     parser.add_argument("-i", "--image", action="store_true", help="Exclude images from results")
