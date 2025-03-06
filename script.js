@@ -4,6 +4,7 @@ const container = document.querySelector(".container");
 const tableSection = document.querySelector(".table-section");
 const displaySection = document.querySelector(".display-section");
 
+const rows = document.querySelectorAll("tr");
 const galleryContainer = document.createElement("div");
 const carouselContainer = document.createElement("div");
 const backBtn = document.createElement("button");
@@ -25,9 +26,38 @@ let currentSlideIndex = 0;
 
 let data = getTableData();
 
+popup();
+
 createGallery(data);
 
 createCarousel(data);
+
+function popup() {
+  rows.forEach((row) => {
+    let cells = row.querySelectorAll("td");
+    if (!cells[0] || !cells[1]) return;
+
+    row.addEventListener("mousedown", () => {
+      console.log("mousedown");
+      let resContainer = document.createElement("div");
+      resContainer.classList.add("popup-resource");
+      let res = document.createElement("img");
+      res.setAttribute("src", cells[0].textContent.trim());
+      res.setAttribute("alt", cells[1].textContent.trim());
+
+      resContainer.appendChild(res);
+      tableSection.appendChild(resContainer);
+    });
+
+    document.addEventListener("mouseup", () => {
+      const resContainer = tableSection.querySelector(".popup-resource");
+      const res = tableSection.querySelector(".popup-resource img");
+      if (res) resContainer.removeChild(res);
+      if (resContainer) tableSection.removeChild(resContainer);
+      console.log("mouseup");
+    });
+  });
+}
 
 carouselBtn.addEventListener("click", () => {
   tableSection.classList.add("hide-table");
