@@ -15,3 +15,18 @@ Un projet Python conçu pour extraire et organiser des ressources multimédia, t
 - `index.html`: Rapport HTML généré.
 - `styles.css`: Style de base pour le rapport HTML.
 - `script.js`: Fonctionnalités dynamiques du rapport HTML.
+
+## Exemples d'execution 
+
+- URL 1 :
+https://zone.votresite.ca/site-web-blogue/photo-video-audio/photos-et-videos:
+-quand-en-integrer-sur-votre-site-et-ou-vous-les-procurerr/gCsl7aSdzo/
+Page web générée :
+https://www-ens.iro.umontreal.ca/hiver/~terbaoum/ImageAndVideoScrapper/
+page1.html
+- URL 2 :
+http://www-labs.iro.umontreal.ca/~felipe/brand_new_home/creative-design/
+public_html/index.php?lg=fr
+Page web générée :
+https://www-ens.iro.umontreal.ca/hiver/~terbaoum/ImageAndVideoScrapper/
+page2.html
